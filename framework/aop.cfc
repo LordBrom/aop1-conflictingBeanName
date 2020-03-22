@@ -105,7 +105,7 @@ component extends="framework.ioc" {
 		debug.dottedPath = arguments.dottedPath;
 		debug.hasInterceptors = hasInterceptors(arguments.dottedPath);
 		debug.beanName = listLast(arguments.dottedPath, ".");
-		debug.beanNames = getAliases(debug.beanName);
+		debug.beanNames = getAliases(arguments.dottedPath);
 
 		if(dottedPath == 'model.daos.test' AND structKeyExists(url, 'debug')){
 			writeDump(var=debug, abort="true");
@@ -131,7 +131,7 @@ component extends="framework.ioc" {
 	{
 		// build the interceptor array:
 		var beanName = listLast(arguments.dottedPath, ".");
-		var beanNames = getAliases(beanName);
+		var beanNames = getAliases(arguments.dottedPath);
 		var beanTypes = "";
 		var interceptDefinition = "";
 		var interceptedBeanName = "";
@@ -197,7 +197,7 @@ component extends="framework.ioc" {
 		var interceptedBeanName = "";
 		var interceptorDefinition = {};
 		var beanName = listLast(arguments.dottedPath, ".");
-		var beanNames = getAliases(beanName);
+		var beanNames = getAliases(arguments.dottedPath);
 		var beanTypes = "";
 
 
@@ -247,28 +247,20 @@ component extends="framework.ioc" {
 
 
 	/** Finds all aliases for the given beanName. */
-	private array function getAliases(string beanName)
+	private array function getAliases(string dottedPath)
 	{
 		var aliases = [];
 		var beanData = "";
 		var key = "";
 
-
-		if (structKeyExists(variables.beanInfo, arguments.beanName))
+		for (key in variables.beanInfo)
 		{
-			beanData = variables.beanInfo[arguments.beanName];
-
-			for (key in variables.beanInfo)
+			// Same cfc dotted path, must be an alias.
+			if (
+					structKeyExists(variables.beanInfo[key], "cfc") &&
+					variables.beanInfo[key].cfc == arguments.dottedPath)
 			{
-				// Same cfc dotted path, must be an alias.
-				if (
-						key != arguments.beanName &&
-						structKeyExists(variables.beanInfo[key], "cfc") &&
-						structKeyExists(variables.beanInfo[arguments.beanName], "cfc") &&
-						variables.beanInfo[key].cfc == variables.beanInfo[arguments.beanName].cfc)
-				{
-					arrayAppend(aliases, key);
-				}
+				arrayAppend(aliases, key);
 			}
 		}
 
